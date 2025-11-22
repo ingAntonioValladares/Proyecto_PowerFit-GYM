@@ -1,0 +1,446 @@
+html {
+  box-sizing: border-box;
+  font-size: 62.5%;
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  font-size: 16px;
+}
+/* .overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+} */
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+/* UTILIDADES */
+h2 {
+  font-size: 4rem;
+}
+a {
+  font-size: 2rem;
+}
+p {
+  font-size: 2rem;
+}
+.boton_Inscribete {
+  border: 2px solid rgb(150, 102, 13);
+  padding: 8px 10px;
+  border-radius: 15px;
+  background-color: transparent;
+  font-size: 2.1rem;
+  font-weight: 900;
+  background-color: rgb(150, 102, 13);
+}
+.contenedor {
+  max-width: 95%;
+  margin: 0 auto;
+}
+/* MENSAJE DEL SISTEMA */
+.contenedor_Notificaciones {
+  position: fixed;
+  top: 16rem;
+  left: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* separación entre notificaciones */
+  z-index: 9999;
+}
+.mensaje_Sistema_Agregaste {
+  background-color: whitesmoke;
+  z-index: 10;
+}
+.mensaje_Sistema_Agregaste {
+  display: flex;
+  align-items: center;
+  column-gap: 1.5rem;
+  padding: 1rem 3rem;
+  border: 2px solid transparent;
+  border-radius: 35px;
+}
+.detalle_Mensaje p {
+  font-size: 1.7rem;
+  color: black;
+  font-weight: 600;
+}
+.detalle_Mensaje p {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+/* NAVEGACIÓN */
+header {
+  width: 100%;
+  height: 14rem;
+}
+header {
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 4rem;
+}
+header {
+  background-color: brown;
+  box-shadow: 5px 5px 15px rgba(134, 67, 13, 0.8);
+}
+.titulo_Principal {
+  font-size: 6rem;
+  margin: 0;
+  color: white;
+  font-weight: 900;
+}
+header svg {
+  fill: white;
+  width: 6rem;
+  height: 6rem;
+  cursor: pointer;
+}
+.navegacion_Principal {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+.navegacion_Principal a {
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 3px;
+}
+
+/* HAMBURGUESA */
+.navegacion_Modal {
+  background-color: whitesmoke;
+}
+.navegacion_Modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 30%;
+  height: 100%;
+  padding: 5rem 4rem;
+  z-index: 1000;
+}
+.navegacion_Modal {
+  display: none;
+  flex-direction: column;
+  gap: 5rem;
+}
+.navegacion_Modal a {
+  color: black;
+  text-decoration: none;
+}
+.inscribete {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.inscribete a {
+  color: white;
+  letter-spacing: 3px;
+}
+.inscribete svg {
+  cursor: pointer;
+  width: 6rem;
+  height: 6rem;
+  fill: black;
+}
+.navegacion_Modal img {
+  width: 28rem;
+  height: 14rem;
+}
+.location p {
+  margin: 0;
+  font-weight: 900;
+}
+
+/* CONTENIDO PRINCIPAL */
+.contenido_Principal {
+  margin-top: 18rem;
+}
+.contenido_Principal {
+  display: grid;
+  place-items: center;
+}
+.contenido_Principal h2 {
+  color: brown;
+}
+.contenido_Principal p {
+  text-align: center;
+  font-size: 3rem;
+  margin-top: 0;
+}
+/* BOTON CARRITO */
+.carrito {
+  display: flex;
+  column-gap: 10px;
+  align-items: center;
+  width: fit-content;
+}
+.carrito {
+  border: 4px solid rgb(216, 18, 18);
+  border-radius: 25px;
+  background-color: rgb(216, 18, 18);
+  padding: 2rem;
+}
+.carrito svg {
+  fill: white;
+  width: 4rem;
+  height: 4rem;
+}
+.carrito {
+  text-decoration: none;
+  color: white;
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+/* MODAL CARRITO */
+.carrito_Modal {
+  background-color: whitesmoke;
+}
+.carrito_Modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 30%;
+  height: 100%;
+  padding: 2rem;
+  z-index: 1000;
+}
+.carrito_Modal {
+  display: none;
+  flex-direction: column;
+  gap: 5rem;
+  background-color: brown;
+}
+.header_Carrito {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header_Carrito {
+  background-color: whitesmoke;
+  border: 2px solid black;
+  padding: 10px;
+}
+.titulo_Carrito p {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+}
+.contenido_Carrito {
+  background-color: whitesmoke;
+  width: 100%;
+  height: 100%;
+}
+.cerrar_Carrito_Modal {
+  width: 6rem;
+  height: 6rem;
+  cursor: pointer;
+  fill: brown;
+}
+.contenido_Carrito {
+  border: 2px solid black;
+}
+.contenido_Carrito {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.contenido_Carrito svg {
+  width: 4rem;
+  height: 4rem;
+}
+.contenido_Carrito p {
+  margin: 0;
+  text-align: center;
+}
+
+/* NAVEGACION SERVICIOS Y PRODUCTOS */
+.contenido_ServiciosProductos {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+}
+.servicios_Productos {
+  list-style: none;
+  padding: 0;
+}
+.servicios_Productos {
+  display: flex;
+  justify-content: space-evenly;
+}
+.servicios_Productos li:first-child {
+  background-color: brown;
+  color: white;
+}
+.servicios_Productos li {
+  cursor: pointer;
+  padding: 5px 10px;
+  border: 2px solid brown;
+  border-radius: 15px;
+  color: brown;
+  font-weight: 900;
+  font-size: 2rem;
+  letter-spacing: 2px;
+}
+.servicios_Productos li:first-child svg {
+  fill: white;
+}
+.servicios_Productos li svg {
+  fill: brown;
+}
+.servicios_Productos li {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+}
+
+/* ESTILOS GENERALES PARA LOS CARD */
+.etiqueta_Categoria {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 10;
+}
+.etiqueta_Contador {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 10;
+}
+.etiqueta_Categoria {
+  border: 2px solid brown;
+  background-color: brown;
+  padding: 5px;
+  border-radius: 10px;
+}
+.etiqueta_Contador {
+  border: 2px solid greenyellow;
+  background-color: greenyellow;
+  padding: 5px;
+  border-radius: 10px;
+}
+.etiqueta_Categoria {
+  color: white;
+  font-weight: 900;
+  font-size: 2rem;
+  letter-spacing: 1px;
+}
+.etiqueta_Contador {
+  color: green;
+  font-weight: 900;
+  font-size: 2rem;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+.etiqueta_Contador {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.etiqueta_Contador_Total {
+  font-weight: 900;
+  color: rgb(0, 58, 0);
+}
+.precio_Card {
+  color: brown;
+  font-weight: 900;
+}
+.opciones {
+  display: flex;
+  align-items: center;
+  column-gap: 18px;
+  margin-bottom: 18px;
+}
+.opciones span {
+  cursor: pointer;
+  border: 2px solid brown;
+  padding: 2px 15px;
+  border-radius: 5px;
+  color: brown;
+  font-size: 2rem;
+  font-weight: 900;
+}
+.opciones p {
+  margin: 0;
+}
+.boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 5px;
+}
+.boton {
+  background-color: brown;
+  padding: 10px;
+  border: 2px solid brown;
+  border-radius: 10px;
+}
+.boton {
+  color: white;
+  font-weight: 600;
+}
+.boton svg {
+  fill: white;
+}
+
+.unidad_Membresia,
+.unidad_Clase,
+.unidad_Suplementos,
+.unidad_Equipamiento {
+  /* para colocar etiqueta_Categoria por encima de la img */
+  position: relative;
+  border: 2px solid brown;
+  width: fit-content;
+  padding: 10px;
+  border-radius: 5px;
+}
+.imagen_Membresia img,
+.imagen_Clase img,
+.imagen_Suplementos img,
+.imagen_Equipamiento img {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* CONTENIDO MEMBRESIA */
+.contenidoMembresia {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  place-items: center;
+}
+/* CONTENIDO CLASES */
+.contenido_Clases {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+/* CONTENIDO SUPLEMENTOS */
+.contenido_Suplementos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+/* CONTENIDO EQUIPAMIENTO */
+.contenido_Equipamiento {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
