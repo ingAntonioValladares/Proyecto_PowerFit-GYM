@@ -99,28 +99,20 @@ header {
 @media (max-width: 768px) {
   header {
     flex-direction: column;
-    height: 18rem;
+    justify-content: center;
+    height: 14rem;
   }
 }
-@media (max-width: 576px) {
+@media (max-width: 360px) {
   header {
-    flex-direction: column;
-    height: 18rem;
+    height: 16rem;
   }
 }
-@media (max-width: 480px) {
+@media (max-width: 280px) {
   header {
-    flex-direction: column;
     height: 18rem;
   }
 }
-@media (max-width: 320px) {
-  header {
-    flex-direction: column;
-    height: 18rem;
-  }
-}
-
 header {
   background-color: brown;
   box-shadow: 5px 5px 15px rgba(134, 67, 13, 0.8);
@@ -132,17 +124,11 @@ header {
   font-weight: 900;
   text-align: center;
 }
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .titulo_Principal {
     font-size: 4rem;
   }
 }
-@media (max-width: 320px) {
-  .titulo_Principal {
-    font-size: 4rem;
-  }
-}
-
 header svg {
   fill: white;
   width: 6rem;
@@ -211,11 +197,11 @@ header svg {
 
 /* CONTENIDO PRINCIPAL */
 .contenido_Principal {
-  margin-top: 17rem;
+  margin-top: 14rem;
 }
 @media (max-width: 320px) {
   .contenido_Principal {
-    margin-top: 18rem;
+    margin-top: 16rem;
   }
 }
 .contenido_Principal {
@@ -224,6 +210,7 @@ header svg {
 }
 .contenido_Principal h2 {
   color: brown;
+  text-align: center;
 }
 .contenido_Principal p {
   text-align: center;
@@ -263,6 +250,18 @@ header svg {
   width: 4rem;
   height: 4rem;
 }
+@media (max-width: 768px) {
+  .carrito svg {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+@media (max-width: 576px) {
+  .carrito svg {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+}
 @media (max-width: 320px) {
   .carrito svg {
     width: 2.5rem;
@@ -276,8 +275,12 @@ header svg {
   font-weight: 900;
   letter-spacing: 2px;
 }
-
-@media (max-width: 320px) {
+@media (max-width: 768px) {
+  .carrito {
+    font-size: 2rem;
+  }
+}
+@media (max-width: 576px) {
   .carrito {
     font-size: 2rem;
   }
@@ -290,10 +293,35 @@ header svg {
   position: fixed;
   top: 0;
   right: 0;
-  width: 30%;
+  width: 35%;
   height: 100%;
   padding: 2rem;
   z-index: 1000;
+}
+@media (max-width: 1024px) {
+  .carrito_Modal {
+    width: 50%;
+  }
+}
+@media (max-width: 834px) {
+  .carrito_Modal {
+    width: 60%;
+  }
+}
+@media (max-width: 768px) {
+  .carrito_Modal {
+    width: 100%;
+  }
+}
+@media (max-width: 576px) {
+  .carrito_Modal {
+    width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  .carrito_Modal {
+    width: 100%;
+  }
 }
 @media (max-width: 320px) {
   .carrito_Modal {
