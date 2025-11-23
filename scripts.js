@@ -266,7 +266,7 @@ function nuestros_Suplementos() {
     },
     {
       nombre: "Pre-Workout",
-      detalle: "Energía y enfoque para entrenar - 30 porciones",
+      detalle: "Energía y enfoque - 30 porciones",
       precio: 35.99,
       src: "img/proteina3.png",
     },
