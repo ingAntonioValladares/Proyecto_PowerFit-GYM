@@ -486,6 +486,9 @@ function agregar_Productos_Carrito(unidad_Card) {
       // ACUMULAR CANTIDAD POR CADA CARD
       total_Card = total_Card + parseInt(cantidad.textContent);
       etiqueta_Contador_Clase.textContent = total_Card;
+      // aqui guardar la cantidad para que se quede a pesar
+      // de cambiar a otra categoria?
+      guardarCantidadCard(card, total_Card);
       // ACUMULAR CANTIDAD DE TODAS LAS CARD
       total_Carrito = total_Carrito + parseInt(cantidad.textContent);
       // ASIGNAR LA CANTIDAD TOTAL DE TODAS LAS CARD AL CARRITO MODAL
@@ -506,6 +509,10 @@ function adicionar_Restar(unidad_Card) {
       // PARA SABER A QUE CARD PERTENECE EL BOTON
       // QUE DIMOS CLICK
       const card = btn.closest(`.${unidad_Card}`);
+      // probar const card = btn.closest(`.${unidad_Card} btn`)
+      // Tal vez evitemos validar el if(!card) return;
+      // porque solo cogemos los botones del card perteneciente a la categoria que di click
+      // aun no lo compruebo
       if (!card) return;
       // CUANDO SABEMOS EL CARD
       // OBTENEMOS LA CANTIDAD DEL HTML
@@ -534,7 +541,93 @@ function adicionar_Restar(unidad_Card) {
     });
   });
 }
-
+// el array debe existir en el global
+// para guardar la cantidad de todas las card
+// para evitar que se sobrescriban los datos
+let lista_Card = [];
+// FUNCION QUE GUARDA LAS CANTIDADES INDIVIDUALES POR CARD
+// ARGUMENTOS -> LA CARD EN DONDE ESTOY Y SU CANTIDAD RESPECTIVA
+function guardarCantidadCard(card, total_Card) {
+  // OBTENGO EL NOMBRE DEL PRODUCTO
+  const producto = card.querySelector(".nombreProducto");
+  // OBTENER EL PRECIO DEL PRODUCTO
+  const precio = card.querySelector(".precio_Card"); // S/29.99
+  // solo obtener el valor numero
+  const precio_Formateado = precio.textContent.split("/")[1]; //29.99
+  // CALCULAMOS MONTO A PAGAR CANTIDAD ELEGIDA POR PRECIO UNITARIO
+  const totalPagar = total_Card * parseFloat(precio_Formateado);
+  // CREAMOS OBJETO QUE GUARDA DOS PROPIEDADES
+  const cantidad_Producto = {
+    nombreProducto: producto.textContent.trim(),
+    cantidad: total_Card,
+    precioProducto: precio_Formateado,
+    monto_Precio_Cantidad: totalPagar,
+  };
+  // INGRESAMOS EL OBJETO AL ARRAY
+  lista_Card.push(cantidad_Producto);
+  // GUARDAMOS LA LISTA EN EL localStorage
+  // CLAVE QUE IDENTIFICA A LA LISTA
+  // LOS DATOS CONVERTIDOS A CADENA
+  localStorage.setItem("cantidad_Producto", JSON.stringify(lista_Card));
+}
+// ELIMINAR TODOS LOS REGISTROS
+// localStorage.removeItem("cantidad_Producto");
+// OBTENER LOS REGISTROS DEL localStorage
+function obtenerRegistros() {
+  // EVALUAMOS SI EXISTE LA CLAVE
+  const existe_Clave = localStorage.getItem("cantidad_Producto");
+  if (existe_Clave) {
+    // SI EXISTE -> CONVERTIMOS LA CADENA A ARRAY
+    lista_Card = JSON.parse(existe_Clave);
+  } else {
+    // SI NO EXISTE -> EL ARRAY ES VACIO
+    lista_Card = [];
+  }
+  console.table(lista_Card);
+  reducir_Cantidades_Producto(lista_Card);
+}
+obtenerRegistros();
+function reducir_Cantidades_Producto(registros) {
+  // Primero agrupar todas las cantidades
+  // un objeto con dos propiedades -> nombreProducto, [cantidades]
+  // correccion un objeto con tres propiedades -> nombreProducto, [cantidades], [montos]
+  const agrupando_Cantidades = registros.reduce((acc, registro) => {
+    // Si en el objeto acumulador
+    // no existe el nombre del producto como propiedad
+    if (!acc[registro.nombreProducto]) {
+      // creamos la propiedad y su valor un array vacio
+      acc[registro.nombreProducto] = [];
+    }
+    // Ya que existe insertamos cantidades y montos
+    // cada uno en su array
+    acc[registro.nombreProducto].push({
+      cantidades: [registro.cantidad],
+      montos: [registro.monto_Precio_Cantidad],
+    }); // retornamos objeto
+    return acc;
+  }, {});
+  // despues sumar todas las cantidades por producto
+  for (let propiedad in agrupando_Cantidades) {
+    console.log(`Producto: ${propiedad}`);
+    // Sumando cantidades y montos por cada producto
+    // agrupando_Cantidades[propiedad] -> array con objetos
+    // objeto cantidades con su array
+    // objeto montos con su array
+    let total_Cantidades = 0;
+    let total_Montos = 0;
+    agrupando_Cantidades[propiedad].forEach((objeto) => {
+      // Este bucle da vueltas
+      // por cada vuelta suma cantidades
+      // por cada vuelta suma montos
+      // de cada producto de manera individual
+      total_Cantidades = total_Cantidades + parseInt(objeto.cantidades);
+      total_Montos = total_Montos + parseFloat(objeto.montos);
+    });
+    console.log(`CANTIDAD: ${total_Cantidades}`);
+    console.log(`MONTO: ${total_Montos}`);
+  }
+  // console.log(sumandoCantidades);
+}
 /* CODIGO QUE REPETI PERO IDENTIFIQUE UN PROCESO DE ABSTRACCION 
    QUE ME PERMITE OPTIMIZAR TODO */
 // CLASES -> LOGICA PARA AUMENTAR CANTIDAD O DISMINUIRLA
