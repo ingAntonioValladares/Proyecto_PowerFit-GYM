@@ -64,6 +64,7 @@ function carrito() {
   carrito.addEventListener("click", () => {
     const carrito_Modal = document.querySelector(".carrito_Modal");
     carrito_Modal.style.display = "flex";
+    obtenerRegistros();
     // body.classList.add("overlay");
   });
 }
@@ -153,6 +154,7 @@ function nuestras_Membresias() {
     // recien en este momento del click
     adicionar_Restar("unidad_Membresia");
     agregar_Productos_Carrito("unidad_Membresia");
+    // restaurarCantidadesIndividuales();
   });
 }
 /*------------------- CLASES -------------------*/
@@ -247,6 +249,7 @@ function nuestras_Clases() {
     // PORQUE AQUI EXISTE EL CONTENIDO DE CLASES
     adicionar_Restar("unidad_Clase");
     agregar_Productos_Carrito("unidad_Clase");
+    // restaurarCantidadesIndividuales();
   });
 }
 /*------------------- SUPLEMENTOS -------------------*/
@@ -330,6 +333,7 @@ function nuestros_Suplementos() {
     }
     adicionar_Restar("unidad_Suplementos");
     agregar_Productos_Carrito("unidad_Suplementos");
+    // restaurarCantidadesIndividuales();
   });
 }
 /*------------------- EQUIPAMIENTO -------------------*/
@@ -416,6 +420,7 @@ function nuestros_Equipamientos() {
     }
     adicionar_Restar("unidad_Equipamiento");
     agregar_Productos_Carrito("unidad_Equipamiento");
+    // restaurarCantidadesIndividuales();
   });
 }
 // CONSTRUCCIÓN DE MENSAJE FLOTANTE DEL SISTEMA
@@ -461,8 +466,8 @@ function mensajeFlotante(cantidad, producto) {
 // AUN FALTA DETALLE DEL CARRITO
 function agregar_Productos_Carrito(unidad_Card) {
   const agregar_Carrito = document.querySelectorAll(".boton");
-  const cantidad_Carrito = document.querySelector(".cantidad_Carrito");
-  let total_Carrito = 0;
+  // const cantidad_Carrito = document.querySelector(".cantidad_Carrito");
+  // let total_Carrito = 0;
   agregar_Carrito.forEach((btn) => {
     let total_Card = 0;
     btn.addEventListener("click", () => {
@@ -486,13 +491,20 @@ function agregar_Productos_Carrito(unidad_Card) {
       // ACUMULAR CANTIDAD POR CADA CARD
       total_Card = total_Card + parseInt(cantidad.textContent);
       etiqueta_Contador_Clase.textContent = total_Card;
-      // aqui guardar la cantidad para que se quede a pesar
+      // FUNCION QUE GUARDA LA CANTIDAD INDIVIDUAL POR PRODUCTO
+      // PARA CAMBIAR DE CATEGORIA Y QUE NO SE PIERDA LA CANTIDAD
+      // grabarCantidadIndividualProducto(card, total_Card);
+      // pretendp guardar la cantidad para que se quede a pesar
       // de cambiar a otra categoria?
+      // GUARDAR LA CANTIDAD DE LA CARD ACTUAL en el localStorage
+      // LLAMAR A LA FUNCION QUE GUARDA LA CANTIDAD POR CARD
+      // ESTA FUNCION ES PARA EL CARRITO MODAL
       guardarCantidadCard(card, total_Card);
       // ACUMULAR CANTIDAD DE TODAS LAS CARD
-      total_Carrito = total_Carrito + parseInt(cantidad.textContent);
+      // total_Carrito = total_Carrito + parseInt(cantidad.textContent);
       // ASIGNAR LA CANTIDAD TOTAL DE TODAS LAS CARD AL CARRITO MODAL
-      cantidad_Carrito.textContent = total_Carrito;
+      // cantidad_Carrito.textContent = total_Carrito;
+
       // VOLVER A UNO LA CANTIDAD
       cantidad.textContent = 1;
     });
@@ -546,6 +558,7 @@ function adicionar_Restar(unidad_Card) {
 // para evitar que se sobrescriban los datos
 let lista_Card = [];
 // FUNCION QUE GUARDA LAS CANTIDADES INDIVIDUALES POR CARD
+// TODO LO QUE NECESITO PARA LLENAR EL MODAL CARRITO EN UN OBJETO
 // ARGUMENTOS -> LA CARD EN DONDE ESTOY (di click) Y SU CANTIDAD RESPECTIVA
 function guardarCantidadCard(card, total_Card) {
   // OBTENGO EL NOMBRE DEL PRODUCTO
@@ -567,17 +580,15 @@ function guardarCantidadCard(card, total_Card) {
     precioProducto: parseFloat(precio_Formateado),
     monto_Precio_Cantidad: parseFloat(totalPagar.toFixed(2)),
   };
-  // INGRESAMOS EL OBJETO AL ARRAY
   lista_Card.push(cantidad_Producto);
-  // GUARDAMOS LA LISTA EN EL localStorage
-  // CLAVE QUE IDENTIFICA A LA LISTA
-  // LOS DATOS CONVERTIDOS A CADENA
+  // Guardar la lista actualizada en localStorage
   localStorage.setItem("cantidad_Producto", JSON.stringify(lista_Card));
   // obtenerRegistros();
 }
 
 // ELIMINAR TODOS LOS REGISTROS PARA VALIDACIONES
 // localStorage.removeItem("cantidad_Producto");
+// localStorage.removeItem("cantidadProducto");
 
 // OBTENER LOS REGISTROS DEL localStorage
 function obtenerRegistros() {
@@ -598,7 +609,7 @@ function obtenerRegistros() {
   reducir_Cantidades_Producto(lista_Card);
 }
 // AL CARGAR LA PAGINA OBTENER REGISTROS
-obtenerRegistros();
+// obtenerRegistros();
 // FUNCION QUE REDUCE LAS CANTIDADES DE CADA PRODUCTO
 // SEGUN SU NOMBRE
 function reducir_Cantidades_Producto(registros) {
@@ -644,7 +655,50 @@ function reducir_Cantidades_Producto(registros) {
   }
   // AQUÍ TERMINA LA REDUCCIÓN DE CANTIDADES Y MONTOS
 }
-
+// FUNCION QUE GRABA LA CANTIDAD INDIVIDUAL POR PRODUCTO
+function grabarCantidadIndividualProducto(card, total_Card) {
+  // OBTENGO EL NOMBRE DEL PRODUCTO
+  const producto = card.querySelector(".nombreProducto");
+  // Eliminar espacios en blanco al inicio y final trim()
+  const producto_Nombre = producto.textContent.trim();
+  // CREO OBJETO QUE GUARDA EL NOMBRE Y LA CANTIDAD
+  const objeto_Producto = {
+    nombre: producto_Nombre,
+    cantidad: total_Card,
+  };
+  // GUARDO EL OBJETO EN EL localStorage
+  localStorage.setItem("cantidadProducto", JSON.stringify(objeto_Producto));
+}
+// FUNCION QUE RESTAURA LA CANTIDAD INDIVIDUAL POR PRODUCTO
+function restaurarCantidadesIndividuales() {
+  // EVALUAMOS SI EXISTE LA CLAVE
+  const existe_Clave = localStorage.getItem("cantidadProducto");
+  if (existe_Clave) {
+    // SI EXISTE -> CONVERTIMOS LA CADENA A OBJETO
+    const objeto_Producto = JSON.parse(existe_Clave);
+    // BUSCAMOS EN EL DOM LA CARD QUE COINCIDA CON EL NOMBRE
+    // DEL OBJETO OBTENIDO
+    const cards = document.querySelectorAll(
+      ".unidad_Clase, .unidad_Membresia, .unidad_Suplementos, .unidad_Equipamiento"
+    );
+    // RECORREMOS CADA CARD
+    cards.forEach((card) => {
+      // OBTENEMOS EL NOMBRE DEL PRODUCTO DE LA CARD
+      const producto = card.querySelector(".nombreProducto");
+      // ELIMINAR ESPACIOS EN BLANCO AL INICIO Y FINAL TRIM()
+      const producto_Nombre = producto.textContent.trim();
+      // COMPARAR NOMBRES
+      if (producto_Nombre === objeto_Producto.nombre) {
+        // SI COINCIDEN OBTENER LA ETIQUETA DONDE VA LA CANTIDAD
+        const etiqueta_Contador_Clase = card.querySelector(
+          ".etiqueta_Contador_Total"
+        );
+        // ASIGNAR LA CANTIDAD GUARDADA
+        etiqueta_Contador_Clase.textContent = objeto_Producto.cantidad;
+      }
+    });
+  }
+}
 /* CODIGO QUE REPETI PERO IDENTIFIQUE UN PROCESO DE ABSTRACCION 
    QUE ME PERMITE OPTIMIZAR TODO */
 // CLASES -> LOGICA PARA AUMENTAR CANTIDAD O DISMINUIRLA
