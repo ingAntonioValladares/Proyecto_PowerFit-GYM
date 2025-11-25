@@ -466,12 +466,11 @@ function mensajeFlotante(cantidad, producto) {
 // AUN FALTA DETALLE DEL CARRITO
 function agregar_Productos_Carrito(unidad_Card) {
   const agregar_Carrito = document.querySelectorAll(".boton");
-  // const cantidad_Carrito = document.querySelector(".cantidad_Carrito");
-  // let total_Carrito = 0;
   agregar_Carrito.forEach((btn) => {
-    let total_Card = 0;
     btn.addEventListener("click", () => {
       const card = btn.closest(`.${unidad_Card}`);
+      // PARA PASAR A LA CARTILLA DEL CARRITO MODAL
+      const rutaCompleta = card.querySelector(`.${unidad_Card} img`).src;
       // Tenemos el mismo boton en todas las card de todas las categorias
       // todos tienen -> class="boton"
       // por ende si en el body tengo por ejemplo:
@@ -481,31 +480,17 @@ function agregar_Productos_Carrito(unidad_Card) {
       // para evitar error de null hacer querySelector a un CONTENIDO QUE NO EXISTE en el body
       // recuerda que hago esto porque tengo el mismo boton en todas las card de todas las categorias
       if (!card) return; // si el boton no pertenece a la categoria
-
       const cantidad = card.querySelector(".cantidad");
       const producto = card.querySelector(".nombreProducto");
-      const etiqueta_Contador_Clase = card.querySelector(
-        ".etiqueta_Contador_Total"
-      );
+      // const etiqueta_Contador_Clase = card.querySelector(
+      //   ".etiqueta_Contador_Total"
+      // );
       mensajeFlotante(cantidad, producto);
-      // ACUMULAR CANTIDAD POR CADA CARD
-      total_Card = total_Card + parseInt(cantidad.textContent);
-      etiqueta_Contador_Clase.textContent = total_Card;
-      // FUNCION QUE GUARDA LA CANTIDAD INDIVIDUAL POR PRODUCTO
-      // PARA CAMBIAR DE CATEGORIA Y QUE NO SE PIERDA LA CANTIDAD
+      // ESTA FUNCION ES PARA MANTENER LA CANTIDAD POR PRODUCTO
       grabarCantidadIndividualProducto(card, producto, cantidad);
-      // pretendp guardar la cantidad para que se quede a pesar
-      // de cambiar a otra categoria?
-      // GUARDAR LA CANTIDAD DE LA CARD ACTUAL en el localStorage
-      // LLAMAR A LA FUNCION QUE GUARDA LA CANTIDAD POR CARD
       // ESTA FUNCION ES PARA EL CARRITO MODAL
-      guardarCantidadCard(card, total_Card);
-      // ACUMULAR CANTIDAD DE TODAS LAS CARD
-      // total_Carrito = total_Carrito + parseInt(cantidad.textContent);
-      // ASIGNAR LA CANTIDAD TOTAL DE TODAS LAS CARD AL CARRITO MODAL
-      // cantidad_Carrito.textContent = total_Carrito;
-
-      // VOLVER A UNO LA CANTIDAD
+      guardarCantidadCard(card, cantidad, rutaCompleta);
+      // RESTAURAR CANTIDAD A 1 DESPUES DE AGREGAR AL CARRITO
       cantidad.textContent = 1;
     });
   });
@@ -553,43 +538,47 @@ function adicionar_Restar(unidad_Card) {
     });
   });
 }
-// el array debe existir en el global
-// para guardar la cantidad de todas las card de una categoria
-// para evitar que se sobrescriban los datos
+// UN ARRAY DE OBJETOS EN EL GLOBAL
+// PARA GUARDAR UN OBJETO POR CADA CARD AGREGADA AL CARRITO
 let lista_Card = [];
-// FUNCION QUE GUARDA LAS CANTIDADES INDIVIDUALES POR CARD
-// TODO LO QUE NECESITO PARA LLENAR EL MODAL CARRITO EN UN OBJETO
+// FUNCION QUE GUARDA EL DETALLE DE CADA CARD AGREGADA AL CARRITO
 // ARGUMENTOS -> LA CARD EN DONDE ESTOY (di click) Y SU CANTIDAD RESPECTIVA
-function guardarCantidadCard(card, total_Card) {
+function guardarCantidadCard(card, agregarCantidad, rutaCompleta) {
+  // ELIMINAR http://127.0.0.1:5500/
+  // SOLO OBTENER img/proteina2.png
+  const rutaRelativa = rutaCompleta.split(window.location.origin + "/")[1];
   // OBTENGO EL NOMBRE DEL PRODUCTO
   const producto = card.querySelector(".nombreProducto");
   // OBTENER EL PRECIO DEL PRODUCTO
   const precio = card.querySelector(".precio_Card"); // S/29.99
   // solo obtener el valor numerico
-  // todos los precios tienen el mismo formato S/29.99
+  // todos los precios tienen el mismo formato -> S/29.99
   // SPLIT DEVUELVE UN ARRAY ["S", "29.99"]
   // Obtenemos el segundo elemento del array
   const precio_Formateado = precio.textContent.split("/")[1]; //29.99
   // CALCULAMOS MONTO A PAGAR CANTIDAD ELEGIDA POR PRECIO UNITARIO
-  const totalPagar = total_Card * parseFloat(precio_Formateado);
-  // CREAMOS OBJETO QUE GUARDA DOS PROPIEDADES
+  const totalPagar =
+    parseInt(agregarCantidad.textContent) * parseFloat(precio_Formateado);
+  // CREAMOS OBJETO QUE GUARDA EL DETALLE DE LA CARD AGREGADA
+  // ESTO ME SERVIRA PARA EL CARRITO MODAL
   const cantidad_Producto = {
+    imagen_Producto: rutaRelativa,
     // Eliminar espacios en blanco al inicio y final trim()
     nombreProducto: producto.textContent.trim(),
-    cantidad: total_Card,
+    cantidad: parseInt(agregarCantidad.textContent),
     precioProducto: parseFloat(precio_Formateado),
     monto_Precio_Cantidad: parseFloat(totalPagar.toFixed(2)),
   };
   lista_Card.push(cantidad_Producto);
-  // Guardar la lista actualizada en localStorage
+  // GUARDAR EN EL localStorage
   localStorage.setItem("cantidad_Producto", JSON.stringify(lista_Card));
 }
-
-// ELIMINAR TODOS LOS REGISTROS PARA VALIDACIONES
+/*********************** ELIMINAR REGISTROS EN EL localStorage **************************/
 // localStorage.removeItem("cantidad_Producto");
 // localStorage.removeItem("cantidad_por_producto");
+/**********************************************************************/
 
-// OBTENER LOS REGISTROS DEL localStorage
+// OBTENER LOS REGISTROS
 function obtenerRegistros() {
   // EVALUAMOS SI EXISTE LA CLAVE
   const existe_Clave = localStorage.getItem("cantidad_Producto");
@@ -604,15 +593,16 @@ function obtenerRegistros() {
   // MOSTRAR EN CONSOLA PARA VERIFICAR
   console.table(lista_Card);
   // LLAMAR A LA FUNCION QUE REDUCE LAS CANTIDADES
-  // COINCIDENCIA DE PRODUCTOS POR NOMBRE
+  // TODAS LAS COINCIDENCIAS DE PRODUCTOS A UN SOLO REGISTRO
+  // SUMANDO LAS CANTIDADES Y MONTOS
+  // ESTE RESUMEN ME SIRVE PARA EL CARRITO MODAL
   reducir_Cantidades_Producto(lista_Card);
 }
 // FUNCION QUE REDUCE LAS CANTIDADES DE CADA PRODUCTO
 // SEGUN COINCIDENCIA DE NOMBRE
-// REDUCE PORQUE APLICO EL METODO REDUCE()
+// REDUCIR PORQUE APLICO EL METODO REDUCE()
 function reducir_Cantidades_Producto(registros) {
-  // PASO 1: Primero agrupar todas las cantidades por producto
-  // correccion un objeto con tres propiedades -> nombreProducto, [cantidades], [montos]
+  // PASO 1: Primero agrupar todas las cantidades por nombre producto
   const agrupando_Cantidades = registros.reduce((acc, registro) => {
     // Si en el objeto acumulador
     // no existe el nombre del producto como propiedad
@@ -620,23 +610,24 @@ function reducir_Cantidades_Producto(registros) {
       // creamos la propiedad y su valor un array vacio
       acc[registro.nombreProducto] = [];
     }
-    // Ya que existe insertamos cantidades y montos
-    // dentro del array de cada producto
-    // un objeto por cada registro que detalla cantidad y monto reducido
+    // Ya que existe insertamos un objeto
+    // con propiedad cantidad y monto
     acc[registro.nombreProducto].push({
-      cantidades: [registro.cantidad],
-      montos: [registro.monto_Precio_Cantidad],
+      cantidad: registro.cantidad,
+      monto: registro.monto_Precio_Cantidad,
     }); // retornamos objeto
     return acc;
   }, {});
-  // PASO 2: despues sumar todas las cantidades por producto
+  console.log(agrupando_Cantidades); //{ Membresia Basica: [{}] }
+  // CREAR UN ARRAY DE RESUMEN PARA EL CARRITO MODAL
+  // UN ARRAY CON TODAS LAS CARTILLAS A MOSTRAR
+  let resumen = [];
+  // SUMAR TODAS LAS CANTIDADES PARA MOSTRAR EN EL CARRITO MODAL
+  let total_Cantidad_General = 0;
+  // PASO 2: despues sumar todas las cantidades y montos por producto
   for (let propiedad in agrupando_Cantidades) {
-    console.log(`Producto: ${propiedad}`);
+    console.log(`Producto: ${propiedad}`); // nombre del producto
     // Sumando cantidades y montos por cada producto
-    // agrupando_Cantidades[propiedad] -> array con objetos
-    // propiedad cantidades con su array
-    // propiedad montos con su array
-    // todo lo reduce a un total por producto
     let total_Cantidades = 0; // inicializo en cero
     let total_Montos = 0; // inicializo en cero
     agrupando_Cantidades[propiedad].forEach((objeto) => {
@@ -645,13 +636,61 @@ function reducir_Cantidades_Producto(registros) {
       // por cada registro de un determinado producto suma cantidades
       // por cada registro de un determinado producto suma montos
       // y asi para cada producto
-      total_Cantidades = total_Cantidades + parseInt(objeto.cantidades);
-      total_Montos = total_Montos + parseFloat(objeto.montos);
+      total_Cantidades = total_Cantidades + parseInt(objeto.cantidad);
+      total_Montos = total_Montos + parseFloat(objeto.monto);
     });
+    total_Cantidad_General = total_Cantidad_General + total_Cantidades;
     console.log(`CANTIDAD: ${total_Cantidades}`);
     console.log(`MONTO: ${total_Montos}`);
+    // Armamos el OBJETO para pintar en el carrito
+    resumen.push({
+      imagen: agrupando_Cantidades[propiedad].imagen_Producto, // imagen
+      nombre: propiedad, // nombre del producto
+      cantidad: total_Cantidades, // cantidad total
+      total: total_Montos, // monto total
+    });
   }
   // AQUÍ TERMINA LA REDUCCIÓN DE CANTIDADES Y MONTOS
+  console.log(`CANTIDAD GENERAL: ${total_Cantidad_General}`);
+  const cantidadCarrito = document.querySelector(".cantidad_Carrito");
+  cantidadCarrito.textContent = total_Cantidad_General;
+  // Pintar en el modal
+  pintarCarritoModal(resumen);
+}
+// FUNCION QUE CREAR CARTILLAS EN EL CARRITO MODAL
+function pintarCarritoModal(resumen) {
+  const contenido = document.querySelector(".contenido_Carrito");
+
+  // ELIMINAR EL CONTENIDO ANTERIOR PARA EVITAR DUPLICADOS
+  contenido.innerHTML = "";
+
+  // SI NO HAY PRODUCTOS
+  if (resumen.length === 0) {
+    contenido.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f">
+        <path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z"/>
+      </svg>
+      <p>Tu carrito está vacío</p>
+      <p>Agrega productos para comenzar</p>
+    `;
+    return;
+  }
+
+  // SI HAY PRODUCTOS → CREAR UNA CARD POR CADA UNO
+  resumen.forEach((item) => {
+    console.log(item);
+    const cardHTML = `
+      <div class="card_carrito">
+        <img src="${item.imagen}" alt="imagen producto">
+        <p class="carrito_nombre">${item.nombre}</p>
+        <p class="carrito_cantidad">Cantidad: <span>${item.cantidad}</span></p>
+        <p class="carrito_total">Total: <span>S/${item.total.toFixed(
+          2
+        )}</span></p>
+      </div>
+    `;
+    contenido.insertAdjacentHTML("beforeend", cardHTML);
+  });
 }
 // FUNCION QUE GRABA LA CANTIDAD INDIVIDUAL POR PRODUCTO
 
