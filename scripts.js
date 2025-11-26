@@ -468,9 +468,11 @@ function agregar_Productos_Carrito(unidad_Card) {
   const agregar_Carrito = document.querySelectorAll(".boton");
   agregar_Carrito.forEach((btn) => {
     btn.addEventListener("click", () => {
+      // PARA SABER A QUE CARD PERTENECE EL BOTON
+      // QUE DIMOS CLICK
       const card = btn.closest(`.${unidad_Card}`);
       // PARA PASAR A LA CARTILLA DEL CARRITO MODAL
-      const rutaCompleta = card.querySelector(`.${unidad_Card} img`).src;
+      // const rutaCompleta = card.querySelector(`.${unidad_Card} img`).src;
       // Tenemos el mismo boton en todas las card de todas las categorias
       // todos tienen -> class="boton"
       // por ende si en el body tengo por ejemplo:
@@ -489,7 +491,7 @@ function agregar_Productos_Carrito(unidad_Card) {
       // ESTA FUNCION ES PARA MANTENER LA CANTIDAD POR PRODUCTO
       grabarCantidadIndividualProducto(card, producto, cantidad);
       // ESTA FUNCION ES PARA EL CARRITO MODAL
-      guardarCantidadCard(card, cantidad, rutaCompleta);
+      guardarCantidadCard(card, cantidad);
       // RESTAURAR CANTIDAD A 1 DESPUES DE AGREGAR AL CARRITO
       cantidad.textContent = 1;
     });
@@ -543,10 +545,10 @@ function adicionar_Restar(unidad_Card) {
 let lista_Card = [];
 // FUNCION QUE GUARDA EL DETALLE DE CADA CARD AGREGADA AL CARRITO
 // ARGUMENTOS -> LA CARD EN DONDE ESTOY (di click) Y SU CANTIDAD RESPECTIVA
-function guardarCantidadCard(card, agregarCantidad, rutaCompleta) {
-  // ELIMINAR http://127.0.0.1:5500/
-  // SOLO OBTENER img/proteina2.png
-  const rutaRelativa = rutaCompleta.split(window.location.origin + "/")[1];
+function guardarCantidadCard(card, agregarCantidad) {
+  // ELIMINAR http://127.0.0.1:5500/ DE LA RUTA COMPLETA
+  // SOLO OBTENER img/proteina2.png POR EJEMPLO
+  // const rutaRelativa = rutaCompleta.split(window.location.origin + "/")[1];
   // OBTENGO EL NOMBRE DEL PRODUCTO
   const producto = card.querySelector(".nombreProducto");
   // OBTENER EL PRECIO DEL PRODUCTO
@@ -562,7 +564,6 @@ function guardarCantidadCard(card, agregarCantidad, rutaCompleta) {
   // CREAMOS OBJETO QUE GUARDA EL DETALLE DE LA CARD AGREGADA
   // ESTO ME SERVIRA PARA EL CARRITO MODAL
   const cantidad_Producto = {
-    imagen_Producto: rutaRelativa,
     // Eliminar espacios en blanco al inicio y final trim()
     nombreProducto: producto.textContent.trim(),
     cantidad: parseInt(agregarCantidad.textContent),
@@ -618,19 +619,19 @@ function reducir_Cantidades_Producto(registros) {
     }); // retornamos objeto
     return acc;
   }, {});
-  console.log(agrupando_Cantidades); //{ Membresia Basica: [{}] }
+  console.log(agrupando_Cantidades); //{ Membresia Basica: [{}], Membresia Premium: [{}] ...}
   // CREAR UN ARRAY DE RESUMEN PARA EL CARRITO MODAL
   // UN ARRAY CON TODAS LAS CARTILLAS A MOSTRAR
   let resumen = [];
   // SUMAR TODAS LAS CANTIDADES PARA MOSTRAR EN EL CARRITO MODAL
   let total_Cantidad_General = 0;
   // PASO 2: despues sumar todas las cantidades y montos por producto
-  for (let propiedad in agrupando_Cantidades) {
-    console.log(`Producto: ${propiedad}`); // nombre del producto
+  for (let producto in agrupando_Cantidades) {
+    console.log(`Producto: ${producto}`); // nombre del producto
     // Sumando cantidades y montos por cada producto
     let total_Cantidades = 0; // inicializo en cero
     let total_Montos = 0; // inicializo en cero
-    agrupando_Cantidades[propiedad].forEach((objeto) => {
+    agrupando_Cantidades[producto].forEach((objeto) => {
       console.log(objeto);
       // Este bucle da vueltas
       // por cada registro de un determinado producto suma cantidades
@@ -642,10 +643,12 @@ function reducir_Cantidades_Producto(registros) {
     total_Cantidad_General = total_Cantidad_General + total_Cantidades;
     console.log(`CANTIDAD: ${total_Cantidades}`);
     console.log(`MONTO: ${total_Montos}`);
+    // console.log(`IMAGEN: ${agrupando_Cantidades[producto][0].imagen}`);
     // Armamos el OBJETO para pintar en el carrito
     resumen.push({
-      imagen: agrupando_Cantidades[propiedad].imagen_Producto, // imagen
-      nombre: propiedad, // nombre del producto
+      // JAJAJAJAJAJAJAJAJAJAJAJAJAJA :) :) SOLUCION MOMENTANEA JAJAJAJAJA
+      // imagen: agrupando_Cantidades[producto][0].imagen, // imagen del producto
+      nombre: producto, // nombre del producto
       cantidad: total_Cantidades, // cantidad total
       total: total_Montos, // monto total
     });
