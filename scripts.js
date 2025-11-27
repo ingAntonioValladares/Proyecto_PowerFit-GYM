@@ -688,12 +688,14 @@ function pintarCarritoModal(resumen) {
         }" alt="imagen producto"></div>
         <div class="detalle_Carrito">
           <p class="carrito_nombre">${item.nombre}</p>
-          <p class="carrito_cantidad">Cantidad: <span>${
-            item.cantidad
-          }</span></p>
           <p class="carrito_precio_unitario"><span>S/${
             item.precio_Unitario
           }</span> c/u</p>
+          <div class="opciones_Carrito">
+            <span class="restar">-</span>
+            <p class="cantidad">${item.cantidad}</p>
+            <span class="adicionar">+</span>
+          </div>
         </div>
         <p class="carrito_total">Total:</br><span>S/${item.total.toFixed(
           2
@@ -703,6 +705,8 @@ function pintarCarritoModal(resumen) {
     // Agregar la card al contenedor del carrito modal
     contenido.insertAdjacentHTML("beforeend", cardHTML);
   });
+  // LLAMAR A LA FUNCION QUE MANEJA LAS OPCIONES DEL CARRITO
+  opciones_Carrito(resumen);
 }
 // FUNCION QUE GRABA LA CANTIDAD INDIVIDUAL POR PRODUCTO
 
@@ -829,4 +833,43 @@ function restaurarCantidadesIndividuales() {
       }
     }
   });
+}
+// FUNCION QUE MANEJA LAS OPCIONES DEL CARRITO MODAL
+function opciones_Carrito(resumen) {
+  // OBTENER TODOS LOS MENU OPCIONES DEL CARRITO MODAL
+  const contenido_Carrito = document.querySelector(".contenido_Carrito");
+  // PUNTUALIZAR TODOS LOS BOTONES ADICIONAR
+  const opciones_Carrito = contenido_Carrito.querySelectorAll(
+    ".opciones_Carrito .adicionar"
+  );
+  // RECORRER TODOS LOS BOTONES ADICIONAR
+  opciones_Carrito.forEach((btnSumar) => {
+    // IDENTIFICAR A QUE CARTILLA PERTENECE EL BOTON
+    const cartilla = btnSumar.closest(".card_carrito");
+    // OBTENER EL NOMBRE DEL PRODUCTO DE ESA CARTILLA
+    // SERA MI FORMA PARA BUSCARLO EN EL ARRAY RESUMEN DEL CARRITO
+    const nombreProducto =
+      cartilla.querySelector(".carrito_nombre").textContent;
+    // RECORRER EL ARRAY RESUMEN PARA ENCONTRAR EL PRODUCTO
+    resumen.forEach((detalle_Producto) => {
+      // EL NOMBRE DEL PRODUCTO EN CARTILLA
+      // BUSCARLO EN EL ARRAY RESUMEN
+      if (detalle_Producto.nombre === nombreProducto) {
+        // ENCONTRADO -> OBTENER LA CANTIDAD ACTUAL
+        let cantidad = detalle_Producto.cantidad;
+        // AGREGAR EVENTO AL BOTON SUMAR
+        btnSumar.addEventListener("click", () => {
+          // INCREMENTAR LA CANTIDAD EN 1
+          cantidad++;
+          // ACTUALIZAR LA CANTIDAD EN LA ETIQUETA DE LA CARTILLA
+          const etiquetaCantidad = cartilla.querySelector(".cantidad");
+          etiquetaCantidad.textContent = cantidad;
+        });
+      }
+    });
+  });
+  // console.log(resumen);
+  // resumen.forEach((producto) => {
+  //   console.log(producto);
+  // });
 }

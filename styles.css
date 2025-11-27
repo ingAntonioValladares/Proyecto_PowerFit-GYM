@@ -693,6 +693,7 @@ header svg {
 .detalle_Carrito {
   display: flex;
   flex-direction: column;
+  align-items: center;
   row-gap: 4px;
 }
 .detalle_Carrito p {
@@ -700,4 +701,22 @@ header svg {
 }
 .carrito_total {
   font-weight: 700;
+}
+
+/* OPCIONES SUMAR O RESTAR */
+/* CARTILLAS DEL CARRITO MODAL */
+.opciones_Carrito {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+}
+
+.opciones_Carrito .restar,
+.opciones_Carrito .adicionar {
+  cursor: pointer;
+  border: 2px solid brown;
+  border-radius: 5px;
+  color: brown;
+  font-size: 2rem;
+  padding: 2px 10px;
 }
