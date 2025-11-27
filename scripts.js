@@ -472,7 +472,7 @@ function agregar_Productos_Carrito(unidad_Card) {
       // QUE DIMOS CLICK
       const card = btn.closest(`.${unidad_Card}`);
       // PARA PASAR A LA CARTILLA DEL CARRITO MODAL
-      // const rutaCompleta = card.querySelector(`.${unidad_Card} img`).src;
+      const rutaCompleta = card.querySelector(`.${unidad_Card} img`).src;
       // Tenemos el mismo boton en todas las card de todas las categorias
       // todos tienen -> class="boton"
       // por ende si en el body tengo por ejemplo:
@@ -491,7 +491,7 @@ function agregar_Productos_Carrito(unidad_Card) {
       // ESTA FUNCION ES PARA MANTENER LA CANTIDAD POR PRODUCTO
       grabarCantidadIndividualProducto(card, producto, cantidad);
       // ESTA FUNCION ES PARA EL CARRITO MODAL
-      guardarCantidadCard(card, cantidad);
+      guardarCantidadCard(card, cantidad, rutaCompleta);
       // RESTAURAR CANTIDAD A 1 DESPUES DE AGREGAR AL CARRITO
       cantidad.textContent = 1;
     });
@@ -542,13 +542,13 @@ function adicionar_Restar(unidad_Card) {
 }
 // UN ARRAY DE OBJETOS EN EL GLOBAL
 // PARA GUARDAR UN OBJETO POR CADA CARD AGREGADA AL CARRITO
-let lista_Card = [];
+let listas_Card_Productos = [];
 // FUNCION QUE GUARDA EL DETALLE DE CADA CARD AGREGADA AL CARRITO
 // ARGUMENTOS -> LA CARD EN DONDE ESTOY (di click) Y SU CANTIDAD RESPECTIVA
-function guardarCantidadCard(card, agregarCantidad) {
+function guardarCantidadCard(card, agregarCantidad, rutaCompleta) {
   // ELIMINAR http://127.0.0.1:5500/ DE LA RUTA COMPLETA
   // SOLO OBTENER img/proteina2.png POR EJEMPLO
-  // const rutaRelativa = rutaCompleta.split(window.location.origin + "/")[1];
+  const rutaRelativa = rutaCompleta.split(window.location.origin + "/")[1];
   // OBTENGO EL NOMBRE DEL PRODUCTO
   const producto = card.querySelector(".nombreProducto");
   // OBTENER EL PRECIO DEL PRODUCTO
@@ -563,110 +563,111 @@ function guardarCantidadCard(card, agregarCantidad) {
     parseInt(agregarCantidad.textContent) * parseFloat(precio_Formateado);
   // CREAMOS OBJETO QUE GUARDA EL DETALLE DE LA CARD AGREGADA
   // ESTO ME SERVIRA PARA EL CARRITO MODAL
-  const cantidad_Producto = {
-    // Eliminar espacios en blanco al inicio y final trim()
+  const detalle_Producto = {
+    // ruta relativa de la imagen
+    imagen: rutaRelativa,
+    // Eliminar espacios en blanco al inicio y final
     nombreProducto: producto.textContent.trim(),
     cantidad: parseInt(agregarCantidad.textContent),
     precioProducto: parseFloat(precio_Formateado),
     monto_Precio_Cantidad: parseFloat(totalPagar.toFixed(2)),
   };
-  lista_Card.push(cantidad_Producto);
+  listas_Card_Productos.push(detalle_Producto);
   // GUARDAR EN EL localStorage
-  localStorage.setItem("cantidad_Producto", JSON.stringify(lista_Card));
+  localStorage.setItem(
+    "detalle_Producto",
+    JSON.stringify(listas_Card_Productos)
+  );
 }
 /*********************** ELIMINAR REGISTROS EN EL localStorage **************************/
-// localStorage.removeItem("cantidad_Producto");
+// localStorage.removeItem("detalle_Producto");
 // localStorage.removeItem("cantidad_por_producto");
 /**********************************************************************/
 
 // OBTENER LOS REGISTROS
 function obtenerRegistros() {
   // EVALUAMOS SI EXISTE LA CLAVE
-  const existe_Clave = localStorage.getItem("cantidad_Producto");
+  const existe_Clave = localStorage.getItem("detalle_Producto");
   if (existe_Clave) {
     // SI EXISTE -> CONVERTIMOS LA CADENA A ARRAY
     // OBTENEMOS EL ARRAY DE OBJETOS
-    lista_Card = JSON.parse(existe_Clave);
+    listas_Card_Productos = JSON.parse(existe_Clave);
   } else {
     // SI NO EXISTE -> EL ARRAY ES VACIO
-    lista_Card = [];
+    listas_Card_Productos = [];
   }
-  // MOSTRAR EN CONSOLA PARA VERIFICAR
-  console.table(lista_Card);
   // LLAMAR A LA FUNCION QUE REDUCE LAS CANTIDADES
   // TODAS LAS COINCIDENCIAS DE PRODUCTOS A UN SOLO REGISTRO
-  // SUMANDO LAS CANTIDADES Y MONTOS
-  // ESTE RESUMEN ME SIRVE PARA EL CARRITO MODAL
-  reducir_Cantidades_Producto(lista_Card);
+  // SUMANDO LAS CANTIDADES Y MONTOS POR PRODUCTO
+  // ESTE RESUMEN ME SIRVE PARA PINTAR EL CARRITO MODAL
+  reducir_Coincidencias(listas_Card_Productos);
 }
 // FUNCION QUE REDUCE LAS CANTIDADES DE CADA PRODUCTO
-// SEGUN COINCIDENCIA DE NOMBRE
-// REDUCIR PORQUE APLICO EL METODO REDUCE()
-function reducir_Cantidades_Producto(registros) {
-  // PASO 1: Primero agrupar todas las cantidades por nombre producto
-  const agrupando_Cantidades = registros.reduce((acc, registro) => {
+// SEGUN COINCIDENCIA POR NOMBRE
+function reducir_Coincidencias(registros) {
+  // PASO 1: Agrupar en un objeto todas las cantidades
+  // por nombre producto que sera la clave
+  const agrupando_Coincidencias = registros.reduce((acc, registro) => {
     // Si en el objeto acumulador
-    // no existe el nombre del producto como propiedad
+    // no existe el nombre del producto como clave
     if (!acc[registro.nombreProducto]) {
-      // creamos la propiedad y su valor un array vacio
+      // creamos la clave y su valor inicial
+      // un array vacio
       acc[registro.nombreProducto] = [];
     }
     // Ya que existe insertamos un objeto
-    // con propiedad cantidad y monto
+    // para costruir la cartilla
+    // que ira en el carrito modal
     acc[registro.nombreProducto].push({
       cantidad: registro.cantidad,
+      precioUnitario: registro.precioProducto,
       monto: registro.monto_Precio_Cantidad,
-    }); // retornamos objeto
-    return acc;
+      rutaImagen: registro.imagen,
+    });
+    return acc; // retornamos objeto
   }, {});
-  console.log(agrupando_Cantidades); //{ Membresia Basica: [{}], Membresia Premium: [{}] ...}
-  // CREAR UN ARRAY DE RESUMEN PARA EL CARRITO MODAL
-  // UN ARRAY CON TODAS LAS CARTILLAS A MOSTRAR
+  // CREAR UN ARRAY DE RESUMEN
+  // CON TODAS LAS CARTILLAS A MOSTRAR
   let resumen = [];
-  // SUMAR TODAS LAS CANTIDADES PARA MOSTRAR EN EL CARRITO MODAL
+  // CANTIDAD TOTAL DEL CARRITO
   let total_Cantidad_General = 0;
-  // PASO 2: despues sumar todas las cantidades y montos por producto
-  for (let producto in agrupando_Cantidades) {
-    console.log(`Producto: ${producto}`); // nombre del producto
+  // PASO 2: sumar todas las cantidades
+  // y montos de un mismo producto
+  for (let producto in agrupando_Coincidencias) {
     // Sumando cantidades y montos por cada producto
     let total_Cantidades = 0; // inicializo en cero
     let total_Montos = 0; // inicializo en cero
-    agrupando_Cantidades[producto].forEach((objeto) => {
-      console.log(objeto);
-      // Este bucle da vueltas
-      // por cada registro de un determinado producto suma cantidades
-      // por cada registro de un determinado producto suma montos
-      // y asi para cada producto
+    agrupando_Coincidencias[producto].forEach((objeto) => {
+      // sumar cantidades de un mismo producto
+      // sumar montos de un mismo producto
       total_Cantidades = total_Cantidades + parseInt(objeto.cantidad);
       total_Montos = total_Montos + parseFloat(objeto.monto);
     });
+    // SUMAR AL TOTAL GENERAL DEL CARRITO
     total_Cantidad_General = total_Cantidad_General + total_Cantidades;
-    console.log(`CANTIDAD: ${total_Cantidades}`);
-    console.log(`MONTO: ${total_Montos}`);
-    // console.log(`IMAGEN: ${agrupando_Cantidades[producto][0].imagen}`);
-    // Armamos el OBJETO para pintar en el carrito
+    // CONSTRUIR EL RESUMEN POR CADA PRODUCTO
     resumen.push({
-      // JAJAJAJAJAJAJAJAJAJAJAJAJAJA :) :) SOLUCION MOMENTANEA JAJAJAJAJA
-      // imagen: agrupando_Cantidades[producto][0].imagen, // imagen del producto
+      // ruta de la imagen de la 1era coincidencia
+      imagen: agrupando_Coincidencias[producto][0].rutaImagen,
       nombre: producto, // nombre del producto
+      // precio unitario de la 1era coincidencia
+      precio_Unitario: agrupando_Coincidencias[producto][0].precioUnitario,
       cantidad: total_Cantidades, // cantidad total
       total: total_Montos, // monto total
     });
   }
-  // AQUÍ TERMINA LA REDUCCIÓN DE CANTIDADES Y MONTOS
-  console.log(`CANTIDAD GENERAL: ${total_Cantidad_General}`);
+  // Pintar la cantidad total en el icono del carrito
   const cantidadCarrito = document.querySelector(".cantidad_Carrito");
   cantidadCarrito.textContent = total_Cantidad_General;
-  // Pintar en el modal
+  // LLAMAR A LA FUNCION QUE PINTA EL CARRITO MODAL
   pintarCarritoModal(resumen);
 }
 // FUNCION QUE CREAR CARTILLAS EN EL CARRITO MODAL
 function pintarCarritoModal(resumen) {
+  // OBTENER EL CONTENEDOR DEL CARRITO MODAL
   const contenido = document.querySelector(".contenido_Carrito");
-
   // ELIMINAR EL CONTENIDO ANTERIOR PARA EVITAR DUPLICADOS
   contenido.innerHTML = "";
-
   // SI NO HAY PRODUCTOS
   if (resumen.length === 0) {
     contenido.innerHTML = `
@@ -678,20 +679,28 @@ function pintarCarritoModal(resumen) {
     `;
     return;
   }
-
   // SI HAY PRODUCTOS → CREAR UNA CARD POR CADA UNO
   resumen.forEach((item) => {
-    console.log(item);
     const cardHTML = `
       <div class="card_carrito">
-        <img src="${item.imagen}" alt="imagen producto">
-        <p class="carrito_nombre">${item.nombre}</p>
-        <p class="carrito_cantidad">Cantidad: <span>${item.cantidad}</span></p>
-        <p class="carrito_total">Total: <span>S/${item.total.toFixed(
+        <div class="imagen_Carrito"><img src="${
+          item.imagen
+        }" alt="imagen producto"></div>
+        <div class="detalle_Carrito">
+          <p class="carrito_nombre">${item.nombre}</p>
+          <p class="carrito_cantidad">Cantidad: <span>${
+            item.cantidad
+          }</span></p>
+          <p class="carrito_precio_unitario"><span>S/${
+            item.precio_Unitario
+          }</span> c/u</p>
+        </div>
+        <p class="carrito_total">Total:</br><span>S/${item.total.toFixed(
           2
         )}</span></p>
       </div>
     `;
+    // Agregar la card al contenedor del carrito modal
     contenido.insertAdjacentHTML("beforeend", cardHTML);
   });
 }

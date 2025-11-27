@@ -331,7 +331,7 @@ header svg {
 .carrito_Modal {
   display: none;
   flex-direction: column;
-  gap: 5rem;
+  gap: 2rem;
   background-color: brown;
 }
 .header_Carrito {
@@ -664,4 +664,40 @@ header svg {
     place-items: center;
     gap: 0.5rem;
   }
+}
+
+/* CARTILLAS DEL CARRITO MODAL */
+.contenido_Carrito {
+  overflow-y: auto;
+  padding-right: 8px; /*para alejarme de la barra lateral del scroll*/
+  /* box-sizing: border-box;
+  padding-top: 185px;
+  padding-bottom: 15px; */
+}
+.contenido_Carrito {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: 15px;
+}
+.card_carrito {
+  display: flex;
+  column-gap: 15px;
+  align-items: center;
+}
+.imagen_Carrito img {
+  width: 14rem;
+  height: 8rem;
+  object-fit: cover;
+}
+.detalle_Carrito {
+  display: flex;
+  flex-direction: column;
+  row-gap: 4px;
+}
+.detalle_Carrito p {
+  font-size: 1.7rem;
+}
+.carrito_total {
+  font-weight: 700;
 }
