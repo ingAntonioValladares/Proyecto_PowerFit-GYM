@@ -862,7 +862,7 @@ function opciones_Carrito(resumen) {
         cartilla.querySelector(".carrito_nombre").textContent;
       const etiquetaCantidad = cartilla.querySelector(".cantidad");
 
-      const producto = obtenerProducto(nombreProducto);
+      const producto = obtenerProducto(nombreProducto); // objeto producto
       if (!producto) return;
 
       // LEER CANTIDAD ACTUAL DESDE EL DOM
@@ -875,13 +875,6 @@ function opciones_Carrito(resumen) {
         cantidad,
         valorSumado
       );
-      // Mi objetivo:
-      // Actulizar contenido DOM
-      // Actulizar contenido logico del producto en js
-      // // ACTUALIZAR EN PANTALLA
-      // etiquetaCantidad.textContent = cantidad;
-      // // ACTUALIZAR EN EL ARRAY RESUMEN
-      // producto.cantidad = cantidad;
     });
   });
 
@@ -938,6 +931,7 @@ function sincronizarCantidades_Card_Cartilla(
       parseInt(filtrados[filtrados.length - 1].cantidad) + valorSumado;
   }
   localStorage.setItem("detalle_Producto", JSON.stringify(registros));
+
   // ACTUALIZAR EN CARD PRINCIPAL
   // Seleccionar todas las tarjetas y aplicar la cantidad si existe en el mapa
   const cards = document.querySelectorAll(
@@ -960,6 +954,8 @@ function sincronizarCantidades_Card_Cartilla(
       // OBTENER LA CANTIDAD DE ESA CARD
       const cantidad_Card = card.querySelector(".etiqueta_Contador_Total");
       cantidad_Card.textContent += valorSumado;
+      // LLAMAR A LA FUNCION QUE GRABA LA CANTIDAD DE CADA CARD
+      // EN EL localStorage
       grabarCantidadIndividualProducto(card, producto, valorSumado);
     }
   });
