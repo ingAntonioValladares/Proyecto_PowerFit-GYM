@@ -589,7 +589,9 @@ function obtenerRegistros() {
   if (existe_Clave) {
     // SI EXISTE -> CONVERTIMOS LA CADENA A ARRAY
     // OBTENEMOS EL ARRAY DE OBJETOS
-    return (listas_Card_Productos = JSON.parse(existe_Clave));
+    listas_Card_Productos = JSON.parse(existe_Clave);
+    // Devolver el array para que quien invoque pueda manipularlo
+    return listas_Card_Productos;
   } else {
     // SI NO EXISTE -> EL ARRAY ES VACIO
     return (listas_Card_Productos = []);
@@ -706,7 +708,6 @@ function pintarCarritoModal(resumen) {
   opciones_Carrito(resumen);
 }
 // FUNCION QUE GRABA LA CANTIDAD INDIVIDUAL POR PRODUCTO
-
 // function grabarCantidadIndividualProducto(card, producto, cantidad) {
 //   const etiqueta_Contador = card.querySelector(".etiqueta_Contador_Total");
 //   // Eliminar espacios en blanco al inicio y final trim()
@@ -855,25 +856,28 @@ function opciones_Carrito(resumen) {
   //        BOTÓN SUMAR
   // ============================
   opciones_Sumar_Carrito.forEach((btnSumar) => {
-    let valorSumado = 0;
     btnSumar.addEventListener("click", () => {
+      // OBTENER LA CARTILLA
       const cartilla = btnSumar.closest(".card_carrito");
+      // EL NOMBRE DEL PRODUCTO DE ESA CARTILLA
       const nombreProducto =
         cartilla.querySelector(".carrito_nombre").textContent;
+      // LA CANTIDAD DE ESA CARTILLA
       const etiquetaCantidad = cartilla.querySelector(".cantidad");
-
-      const producto = obtenerProducto(nombreProducto); // objeto producto
+      // OBTENER EL OBJETO PRODUCTO DEL CUAL ESTOY MANIPULANDO SU MENU EN EL CARRITO
+      const producto = obtenerProducto(nombreProducto);
       if (!producto) return;
-
-      // LEER CANTIDAD ACTUAL DESDE EL DOM
+      // GUARDAR LA CANTIDAD ACTUAL DE ESA CARTILLA
       let cantidad = parseInt(etiquetaCantidad.textContent);
-      cantidad++; // SUMAR 1
-      valorSumado++;
+      // INCREMENTAR EN UNO AL DAR CLICK EN BOTON SUMAR
+      cantidad++;
+      // por cada click sumamos 1 unidad
+      const increment = 1;
       sincronizarCantidades_Card_Cartilla(
-        cartilla,
-        producto,
-        cantidad,
-        valorSumado
+        cartilla, // LA CARTILLA DEL CARRITO
+        producto, // EL OBJETO PRODUCTO DE ESE CARRITO
+        cantidad, // LA CANTIDAD NUEVA
+        increment // LA CANTIDAD DE VECES QUE SUME (siempre 1)
       );
     });
   });
@@ -896,10 +900,51 @@ function opciones_Carrito(resumen) {
 
       cantidad--; // RESTAR 1
 
-      // SI LLEGA A 0 → ELIMINAR CARTILLA
+      // SI LLEGA A 0 → ELIMINAR CARTILLA Y LIMPIAR STORAGE
       if (cantidad < 1) {
+        // Nombre del producto para limpiar
+        const nombre = nombreProducto.trim();
+
+        // 1) Eliminar todas las entradas en detalle_Producto que correspondan
+        let registros = obtenerRegistros();
+        const filtrados = registros.filter((r) => r.nombreProducto !== nombre);
+        listas_Card_Productos = filtrados;
+        localStorage.setItem(
+          "detalle_Producto",
+          JSON.stringify(listas_Card_Productos)
+        );
+
+        // 2) Quitar la clave del mapa de cantidades (cantidad_por_producto)
+        try {
+          const raw = localStorage.getItem(KEY_CANTIDADES) || "{}";
+          const mapa = JSON.parse(raw);
+          if (mapa && mapa.hasOwnProperty(nombre)) {
+            delete mapa[nombre];
+            localStorage.setItem(KEY_CANTIDADES, JSON.stringify(mapa));
+          }
+        } catch (e) {
+          console.warn("Error limpiando cantidad_por_producto:", e);
+        }
+
+        // 3) Actualizar la card principal si está visible: poner contador a 0
+        const cards = document.querySelectorAll(
+          ".unidad_Clase, .unidad_Membresia, .unidad_Suplementos, .unidad_Equipamiento"
+        );
+        cards.forEach((card) => {
+          const prod = card.querySelector(".nombreProducto");
+          if (!prod) return;
+          if (prod.textContent.trim() === nombre) {
+            const etiqueta = card.querySelector(".etiqueta_Contador_Total");
+            if (etiqueta) etiqueta.textContent = 0;
+          }
+        });
+
+        // 4) Remover la cartilla del DOM
         cartilla.remove();
-        // OPCIONAL: también podrías eliminarlo del array resumen
+
+        // 5) Recalcular y pintar el carrito modal y el contador global
+        reducir_Coincidencias_CargarCarrito();
+
         return;
       }
 
@@ -908,20 +953,23 @@ function opciones_Carrito(resumen) {
 
       // ACTUALIZAR EN EL ARRAY RESUMEN
       producto.cantidad = cantidad;
+
+      // Sincronizar cambios con cards principales y storage (decrementar 1)
+      sincronizarCantidades_Card_Cartilla(cartilla, producto, cantidad, -1);
     });
   });
 }
 function sincronizarCantidades_Card_Cartilla(
-  cartilla,
-  objProducto,
-  cantidad,
-  valorSumado
+  cartilla, // LA CARTILLA DEL CARRITO
+  objProducto, // EL OBJETO PRODUCTO DE ESE CARRITO
+  cantidad, // LA CANTIDAD NUEVA
+  valorSumado // LA CANTIDAD DE VECES QUE SUME DE A UNO
 ) {
   // ACTUALIZAR CARRITO
   const etiquetaCantidad = cartilla.querySelector(".cantidad");
   etiquetaCantidad.textContent = cantidad;
 
-  // ACTUALIZAR EN EL ARRAY RESUMEN
+  // ACTUALIZAR EL ARRAY RESUMEN
   let registros = obtenerRegistros();
   let filtrados = registros.filter(
     (producto) => producto.nombreProducto === objProducto.nombre
@@ -953,7 +1001,11 @@ function sincronizarCantidades_Card_Cartilla(
     if (nombre_Card === objProducto.nombre) {
       // OBTENER LA CANTIDAD DE ESA CARD
       const cantidad_Card = card.querySelector(".etiqueta_Contador_Total");
-      cantidad_Card.textContent += valorSumado;
+      // sumar numéricamente (evitar concatenación de strings)
+      const actual =
+        parseInt((cantidad_Card && cantidad_Card.textContent) || "0", 10) || 0;
+      const nuevo = actual + Number(valorSumado);
+      cantidad_Card.textContent = nuevo;
       // LLAMAR A LA FUNCION QUE GRABA LA CANTIDAD DE CADA CARD
       // EN EL localStorage
       grabarCantidadIndividualProducto(card, producto, valorSumado);
